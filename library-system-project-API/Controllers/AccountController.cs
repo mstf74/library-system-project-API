@@ -44,7 +44,7 @@ namespace library_system_project_API.Controllers
             if (result.Succeeded)
             {
                 TokenDto tokendto = GenerateToken(user);
-                return Ok(tokendto.token);
+                return Ok(tokendto);
             }
             else
                 return BadRequest(result.ErrorMessage);

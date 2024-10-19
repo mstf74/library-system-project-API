@@ -8,7 +8,7 @@ namespace BusinessLayer.Dto
 {
     public class TokenDto
     {   
-        public string token;
+        public string token { set; get; }
         public DateTime ExpirDate { get; set; }   
     }
 }
