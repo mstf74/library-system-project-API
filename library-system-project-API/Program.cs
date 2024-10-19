@@ -6,6 +6,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
 using System.Text;
 using DataAcessLayer.GenericRepo;
+using BusinessLayer.ManagersInterfaces;
+using BusinessLayer.Managers;
+using Microsoft.OpenApi.Models;
 
 namespace library_system_project_API
 {
@@ -32,7 +35,36 @@ namespace library_system_project_API
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["jwt:key"]))
                 };
             });
+            builder.Services.AddAuthorization();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                // Add security definition
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter JWT with Bearer into field",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = "Bearer"
+                });
 
+                // Add security requirement
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+            });
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -43,8 +75,19 @@ namespace library_system_project_API
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DEPI_Test"));
             });
-            builder.Services.AddIdentity<ApplicationUser,IdentityRole>().AddEntityFrameworkStores<Context>();
+            builder.Services.AddIdentity<ApplicationUser,IdentityRole>(options => {
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.";
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<Context>();
             builder.Services.AddScoped(typeof(IGenericRepo<>), typeof(GenericRepo<>));
+            builder.Services.AddScoped<IAccountManager,AccountManager>();
+            builder.Services.AddScoped(typeof(UserManager<>));
+            
+
+
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
