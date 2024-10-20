@@ -1,4 +1,4 @@
-﻿using DataAcessLayer.Models.CustomAttributes;
+﻿using BusinessLayer.Dto.CustomAttributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -25,7 +25,6 @@ namespace BusinessLayer.Dto
         [Range(0, 100)]
         public int NumberOfCopies { get; set; }
         [Required]
-        [LessCopies]
         public int AvailableCopies { get; set; }
         public string? CoverUrl { get; set; }
     }

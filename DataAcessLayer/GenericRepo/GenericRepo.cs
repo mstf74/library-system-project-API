@@ -29,15 +29,29 @@ namespace DataAcessLayer.GenericRepo
         // add,delete,update functions return bool so it tells if the operation is done.
         public bool add(T item)
         {
-            _context.Add(item);
+            try
+            {
+                _context.Add(item);
+            }
+            catch (Exception ex) 
+            {
+                throw new Exception(ex.Message);
+            }
             var added = _context.SaveChanges();
             return added > 0;
         }
 
         public bool update(T item)
         {
-            _context.Attach(item);
-            _context.Entry(item).State = EntityState.Modified;
+            try
+            {
+                _context.Attach(item);
+                _context.Entry(item).State = EntityState.Modified;
+            }
+            catch (Exception ex) 
+            {
+                throw new Exception(message: ex.Message);
+            }
             var updated = _context.SaveChanges();
             return updated > 0;
         }
@@ -72,6 +86,6 @@ namespace DataAcessLayer.GenericRepo
             }
             return query.ToList();
         }
-
+        
     }
 }

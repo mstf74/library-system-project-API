@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,6 +34,27 @@ namespace DataAcessLayer.Models
                 .WithOne(l => l.Fine)
                 .HasForeignKey<Fine>(f => f.LoanId);
 
+        }
+        public override int SaveChanges()
+        {
+            var entities = ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified)
+                .Select(e => e.Entity);
+
+            foreach (var entity in entities)
+            {
+                try
+                {
+                    ValidationContext validationContext = new ValidationContext(entity);
+                    Validator.ValidateObject(entity, validationContext, validateAllProperties: true);
+                }
+                catch (Exception ex) 
+                {
+                    throw new Exception(message: ex.Message);
+                }
+            }
+
+            return base.SaveChanges();
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
