@@ -84,10 +84,19 @@ namespace library_system_project_API
             builder.Services.AddScoped<IAccountManager,AccountManager>();
             builder.Services.AddScoped<IBooksManager, BooksManager > ();
             builder.Services.AddScoped(typeof(UserManager<>));
-            
 
 
 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins", policy =>
+                {
+                    policy.AllowAnyOrigin()  // Allow all origins
+                          .AllowAnyHeader()  // Allow any headers
+                          .AllowAnyMethod(); // Allow any HTTP methods
+                });
+            });
 
             var app = builder.Build();
 
@@ -97,7 +106,7 @@ namespace library_system_project_API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors("AllowAllOrigins");
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();

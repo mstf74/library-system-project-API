@@ -27,7 +27,22 @@ namespace library_system_project_API.Controllers
             {
                 var result = await _accountManager.Register(user);
                 if (result.Succeeded)
-                    return Ok(user);
+                {
+                    var loginResult = await _accountManager.Login(new LoginDto()
+                    {
+                        email = user.email,
+                        password = user.password,
+                    });
+                    if (loginResult.Succeeded) 
+                    {
+                        TokenDto token = GenerateToken(loginResult);
+                        return Ok(token);
+                    }
+                    else
+                    {
+                        return BadRequest("register succeeded but login failed");
+                    }
+                }
                 else
                 {
                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
@@ -43,13 +58,13 @@ namespace library_system_project_API.Controllers
             var result = await _accountManager.Login(user);
             if (result.Succeeded)
             {
-                TokenDto tokendto = GenerateToken(user);
+                TokenDto tokendto = GenerateToken(result);
                 return Ok(tokendto);
             }
             else
                 return BadRequest(result.ErrorMessage);
         }
-        private TokenDto GenerateToken(LoginDto user)
+        private TokenDto GenerateToken(LoginResult user)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configurationManager["jwt:key"]));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -70,7 +85,11 @@ namespace library_system_project_API.Controllers
             return new TokenDto()
             {
                 token = new JwtSecurityTokenHandler().WriteToken(token),
-                ExpirDate = token.ValidTo
+                ExpirDate = token.ValidTo,
+                UserId = user.Id,
+                user_name = user.user_name,
+                email = user.email,
+                role = user.role,
             };
         }
 

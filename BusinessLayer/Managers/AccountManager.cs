@@ -46,8 +46,8 @@ namespace BusinessLayer.Managers
         }
         public async Task<LoginResult> Login(LoginDto _user)
         {
-            var email = await _UserManager.FindByEmailAsync(_user.email);
-            if (email == null)
+            var appuser = await _UserManager.FindByEmailAsync(_user.email);
+            if (appuser == null)
             {
                 return new LoginResult()
                 {
@@ -55,7 +55,7 @@ namespace BusinessLayer.Managers
                     ErrorMessage = "Invalid Email"
                 };
             }
-            var check = await _UserManager.CheckPasswordAsync(email, _user.password);
+            var check = await _UserManager.CheckPasswordAsync(appuser, _user.password);
             if (!check)
             {
                 return new LoginResult()
@@ -64,7 +64,15 @@ namespace BusinessLayer.Managers
                     ErrorMessage = "Invalid Password"
                 };
             }
-            return new LoginResult() { Succeeded = true };
+            return new LoginResult() 
+            {
+                Succeeded = true,
+                Id = appuser.Id,
+                user_name = appuser.UserName,
+                email = appuser.Email,
+                role = appuser.Role,
+                
+            };
 
         }
     }
