@@ -20,6 +20,16 @@ namespace library_system_project_API.Controllers
             _accountManager = accountManager;
             _configurationManager = configurationManager;
         }
+        [HttpGet]
+        public async Task<IActionResult> GetById(string id)
+        {
+            var user = await _accountManager.GetById(id);
+            if (user == null) 
+            {
+                return NotFound();
+            }
+            return Ok(user);
+        }
         [HttpPost]
         public async Task<IActionResult> Register(RegistrationDto user)
         {
@@ -95,6 +105,16 @@ namespace library_system_project_API.Controllers
             }
             else
                 return BadRequest(result.ErrorMessage);
+        }
+        [HttpPut]
+        public async Task<IActionResult> Update(string id , AccountDto user)
+        {
+            var result = await _accountManager.UpdateUser(id, user);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+            return Ok(result.ErrorMessage);
         }
         private TokenDto GenerateToken(LoginResult user)
         {

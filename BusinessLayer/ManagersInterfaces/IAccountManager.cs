@@ -14,8 +14,9 @@ namespace BusinessLayer.ManagersInterfaces
     {
         Task<IdentityResult> Register(RegistrationDto user);
         Task<LoginResult> Login(LoginDto _user);
-        ApplicationUser GetById(string id);
          Task<IdentityResult> RegisterAdmin(RegistrationDto user);
+        Task<AccountDto> GetById(string id);
+        Task<LoginResult> UpdateUser(string id, AccountDto account);
 
     }
 }
