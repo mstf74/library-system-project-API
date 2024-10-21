@@ -17,6 +17,7 @@ namespace BusinessLayer.Managers
     {
         IGenericRepo<ApplicationUser> _UserRepo;
         UserManager<ApplicationUser> _UserManager;
+
         public AccountManager(IGenericRepo<ApplicationUser> userRepo, UserManager<ApplicationUser> UserManager)
         {
             _UserManager = UserManager;
@@ -44,6 +45,30 @@ namespace BusinessLayer.Managers
             var result = await _UserManager.CreateAsync(iduser, user.password);
             return result;
         }
+        public async Task<IdentityResult> RegisterAdmin(RegistrationDto user)
+        {
+            var userName = await _UserManager.FindByNameAsync(user.user_name);
+            if (userName != null)
+            {
+                return IdentityResult.Failed(new IdentityError
+                {
+                    Description = "UserName is already registered."
+                });
+            }
+            ApplicationUser iduser = new ApplicationUser()
+            {
+                FirstName = user.firstName,
+                LastName = user.lastName,
+                UserName = user.user_name,
+                Email = user.email,
+                PhoneNumber = user.phoneNumber,
+                MemberShipDate = DateTime.Now,
+                Role = "Admin"
+            };
+            var result = await _UserManager.CreateAsync(iduser, user.password);
+            return result;
+        }
+
         public async Task<LoginResult> Login(LoginDto _user)
         {
             var appuser = await _UserManager.FindByEmailAsync(_user.email);
@@ -74,6 +99,11 @@ namespace BusinessLayer.Managers
                 
             };
 
+        }
+        public ApplicationUser GetById(string id) 
+        {
+            var user = _UserManager.FindByIdAsync(id).Result;
+            return user;
         }
     }
 }

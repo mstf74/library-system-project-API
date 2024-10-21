@@ -52,6 +52,38 @@ namespace library_system_project_API.Controllers
             return BadRequest();
         }
         [HttpPost]
+        public async Task<IActionResult> RegisterAdmin(RegistrationDto user)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _accountManager.RegisterAdmin(user);
+                if (result.Succeeded)
+                {
+                    var loginResult = await _accountManager.Login(new LoginDto()
+                    {
+                        email = user.email,
+                        password = user.password,
+                    });
+                    if (loginResult.Succeeded)
+                    {
+                        TokenDto token = GenerateToken(loginResult);
+                        return Ok(token);
+                    }
+                    else
+                    {
+                        return BadRequest("register succeeded but login failed");
+                    }
+                }
+                else
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    return BadRequest(errors);
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
         public async Task<IActionResult> Login(LoginDto user)
         {
 
@@ -70,7 +102,6 @@ namespace library_system_project_API.Controllers
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var claims = new[]
             {
-
                 new Claim(JwtRegisteredClaimNames.Sub,user.email),
                 new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
                 

@@ -22,7 +22,6 @@ namespace DataAcessLayer.Models
         [Column(TypeName = "datetime2")]
         public DateTime ReturnDate { get; set; }
         [Required]
-        [MaxLength(50)]
         public string Status { get; set; }
         [Required]
         [ForeignKey("User")]

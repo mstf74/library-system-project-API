@@ -1,6 +1,8 @@
 ﻿using BusinessLayer.Dto;
 using BusinessLayer.ManagersInterfaces;
 using DataAcessLayer.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -9,6 +11,7 @@ namespace library_system_project_API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class BooksController : ControllerBase
     {
         private readonly IBooksManager _booksManager;
@@ -17,6 +20,7 @@ namespace library_system_project_API.Controllers
             _booksManager = booksManager;
         }
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult GetAll() 
         {
             var books = _booksManager.GetAll();

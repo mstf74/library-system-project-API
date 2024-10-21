@@ -83,6 +83,7 @@ namespace library_system_project_API
             builder.Services.AddScoped(typeof(IGenericRepo<>), typeof(GenericRepo<>));
             builder.Services.AddScoped<IAccountManager,AccountManager>();
             builder.Services.AddScoped<IBooksManager, BooksManager > ();
+            builder.Services.AddScoped<ILoanManager, LoanManager>();
             builder.Services.AddScoped(typeof(UserManager<>));
 
 

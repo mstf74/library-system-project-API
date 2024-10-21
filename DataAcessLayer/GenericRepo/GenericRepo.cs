@@ -43,8 +43,25 @@ namespace DataAcessLayer.GenericRepo
 
         public bool update(T item)
         {
-            try
-            {
+            #region enhancedUpdate
+            //try
+            //{
+            //    var old = Dbset.Find(id);
+
+            //    if (old == null)
+            //        throw new Exception("Entity not found");
+            //    _context.Entry(old).CurrentValues.SetValues(item);
+            //    var check = _context.SaveChanges();
+            //    return check > 0;
+
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw new Exception(ex.Message);
+            //}
+
+            #endregion            //try
+            try{
                 _context.Attach(item);
                 _context.Entry(item).State = EntityState.Modified;
             }
