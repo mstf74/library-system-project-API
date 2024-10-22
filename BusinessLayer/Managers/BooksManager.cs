@@ -47,7 +47,19 @@ namespace BusinessLayer.Managers
 
         public ValidationValues RemoveBook(int bookId)
         {
-            bool check = _bookRepo.remove(bookId);
+            bool check;
+            try
+            {
+                 check = _bookRepo.remove(bookId);
+            }
+            catch (Exception ex) 
+            {
+                return new ValidationValues()
+                {
+                    ValidationMessage = ex.Message,
+                    IsValid = false,
+                };
+            }
             if (!check)
             {
                 return new ValidationValues()

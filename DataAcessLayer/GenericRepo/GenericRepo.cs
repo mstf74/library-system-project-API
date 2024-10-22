@@ -80,11 +80,20 @@ namespace DataAcessLayer.GenericRepo
 
         public bool remove(int id)
         {
+            int deleted;
             var item = Dbset.Find(id);
             if (item != null)
             {
-                _context.Remove(item);
-                var deleted = _context.SaveChanges();
+                try
+                {
+                    _context.Remove(item);
+
+                    deleted = _context.SaveChanges();
+                }
+                catch (Exception ex) 
+                {
+                    throw new Exception("can't remove");
+                }
                 return deleted > 0;
             }
             return false;

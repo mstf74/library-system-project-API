@@ -12,7 +12,7 @@ namespace library_system_project_API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class BooksController : ControllerBase
     {
         private readonly IBooksManager _booksManager;
@@ -23,13 +23,14 @@ namespace library_system_project_API.Controllers
             _booksManager = booksManager;
         }
         [HttpGet]
-        //[AllowAnonymous]
+        [AllowAnonymous]
         public IActionResult GetAll() 
         {
             var books = _booksManager.GetAll();
             return Ok(books);
         }
         [HttpGet("cover/{bookId}")]
+        [AllowAnonymous]
         public IActionResult GetCover(int bookId)
         {
             var book = _booksManager.GetById(bookId);
@@ -78,8 +79,17 @@ namespace library_system_project_API.Controllers
                 return BadRequest(check.ValidationMessage);
         }
         [HttpPut]
-        public IActionResult UpdateBook(int id,[FromForm] BookDto book) 
+        public async Task<IActionResult> UpdateBook(int id,[FromForm] BookDto book) 
         {
+            if (book.CoverUrl == null || book.CoverUrl.Length == 0)
+                return BadRequest("No file uploaded.");
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", book.CoverUrl.FileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await book.CoverUrl.CopyToAsync(stream);
+            }
             var check = _booksManager.UpdateBook(id, book);
             if (check.IsValid)
                 return Ok(book);
