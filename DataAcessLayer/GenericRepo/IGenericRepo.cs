@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -15,5 +16,6 @@ namespace DataAcessLayer.GenericRepo
         bool add(T item);
         bool update(T item);
         bool remove(int id);
+        EntityEntry CheckState(T item);
     }
 }

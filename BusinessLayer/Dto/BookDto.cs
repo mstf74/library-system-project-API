@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.Dto.CustomAttributes;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -26,6 +27,7 @@ namespace BusinessLayer.Dto
         public int NumberOfCopies { get; set; }
         [Required]
         public int AvailableCopies { get; set; }
-        public string? CoverUrl { get; set; }
+        [Required]
+        public IFormFile  CoverUrl { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using BusinessLayer.ManagersInterfaces;
 using DataAcessLayer.GenericRepo;
 using DataAcessLayer.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +38,7 @@ namespace BusinessLayer.Managers
                 Category = book.Category,
                 NumberOfCopies = book.NumberOfCopies,
                 AvailableCopies = book.AvailableCopies,
-                CoverUrl = book.CoverUrl,
+                CoverUrl = book.CoverUrl.FileName,
             };
             var result = validateException(_bookRepo.add, newbook);
             return result;
@@ -80,14 +81,19 @@ namespace BusinessLayer.Managers
             oldBook.Category = book.Category;
             oldBook.NumberOfCopies = book.NumberOfCopies;
             oldBook.AvailableCopies = book.AvailableCopies;
-            oldBook.CoverUrl = book.CoverUrl;
+            oldBook.CoverUrl = book.CoverUrl.FileName;
             var result = validateException(_bookRepo.update,oldBook);
             return result;
         }
+        public  Book GetById(int id)
+                 => _bookRepo.getById(id);
+
+        
+
         private ValidationValues checkUniqueNames(BookDto book)
         {
             var nameCheck = _bookRepo.getAllFilter(e => e.Title == book.Title && e.Author == book.Author).FirstOrDefault();
-            if (nameCheck != null)
+            if (nameCheck != null )
             {
                 return new ValidationValues()
                 {

@@ -1,5 +1,6 @@
 ﻿using DataAcessLayer.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,6 +73,9 @@ namespace DataAcessLayer.GenericRepo
             var updated = _context.SaveChanges();
             return updated > 0;
         }
+        public EntityEntry CheckState(T item)
+            =>  _context.Entry(item);
+        
 
 
         public bool remove(int id)

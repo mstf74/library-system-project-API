@@ -11,6 +11,7 @@ namespace BusinessLayer.ManagersInterfaces
     public interface IBooksManager
     {
         public List<Book> GetAll();
+        public Book GetById(int id);
         public ValidationValues AddBook(BookDto book);
         public ValidationValues RemoveBook(int bookId);
         public ValidationValues UpdateBook(int bookId, BookDto book);
