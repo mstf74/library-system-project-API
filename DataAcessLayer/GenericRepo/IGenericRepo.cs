@@ -17,5 +17,7 @@ namespace DataAcessLayer.GenericRepo
         bool update(T item);
         bool remove(int id);
         EntityEntry CheckState(T item);
+        public bool SaveChanges();
+
     }
 }

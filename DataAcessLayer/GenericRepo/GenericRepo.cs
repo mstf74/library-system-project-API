@@ -99,6 +99,11 @@ namespace DataAcessLayer.GenericRepo
             return false;
             
         }
+        public bool SaveChanges()
+        {
+            var result = _context.SaveChanges();
+            return result > 0;
+        }
         /*a get all function that let the filteration to accure in the server , to avoid bringing all the data in the memory,
          it can be used as : getAllFilter(//the filter: =>e.Age<30 , //if i need to use include: e=>e.Include(e.Department)),
         or i just can use it empty as getAllFilter() and it will bring all the rows

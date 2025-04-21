@@ -3,6 +3,7 @@ using BusinessLayer.ManagersInterfaces;
 using DataAcessLayer.GenericRepo;
 using DataAcessLayer.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +20,13 @@ namespace BusinessLayer.Managers
             _bookRepo = bookRepo;
         }
 
-        public List<Book> GetAll()
+        public List<Book> GetAll(string coverpath)
         {
             var books = _bookRepo.getAll().ToList();
+            foreach (var book in books) 
+            {
+                book.CoverUrl = coverpath + book.CoverUrl;
+            }
             return books;
         }
         public ValidationValues AddBook(BookDto book)
@@ -38,7 +43,7 @@ namespace BusinessLayer.Managers
                 Category = book.Category,
                 NumberOfCopies = book.NumberOfCopies,
                 AvailableCopies = book.AvailableCopies,
-                CoverUrl = book.CoverUrl.FileName,
+                CoverUrl = book.CoverName,
             };
             var result = validateException(_bookRepo.add, newbook);
             return result;

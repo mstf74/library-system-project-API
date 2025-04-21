@@ -10,7 +10,7 @@ namespace BusinessLayer.ManagersInterfaces
 {
     public interface IBooksManager
     {
-        public List<Book> GetAll();
+        public List<Book> GetAll(string coverpath);
         public Book GetById(int id);
         public ValidationValues AddBook(BookDto book);
         public ValidationValues RemoveBook(int bookId);

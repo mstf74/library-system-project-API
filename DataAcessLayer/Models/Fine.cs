@@ -18,7 +18,7 @@ namespace DataAcessLayer.Models
         [MaxLength(20)]
         public string PaymentStatus { get; set; }
         [Required]
-        [Column(TypeName ="datetime2")]
+        [Column(TypeName = "timestamp(6)")]
         public DateTime IssueDate { get; set; }
         [Required]
         [ForeignKey("Loan")]

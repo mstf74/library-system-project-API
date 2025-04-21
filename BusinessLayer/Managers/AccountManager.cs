@@ -92,12 +92,9 @@ namespace BusinessLayer.Managers
             {
                 Succeeded = true,
                 Id = appuser.Id,
-                user_name = appuser.UserName,
                 email = appuser.Email,
                 role = appuser.Role,
-                
             };
-
         }
         public async Task<AccountDto> GetById(string id)
         {
@@ -127,7 +124,7 @@ namespace BusinessLayer.Managers
                 };
             }
             var userName = await _UserManager.FindByNameAsync(account.user_name);
-            if (userName != null)
+            if (userName != null && userName.UserName != account.user_name)
             {
                 return new LoginResult()
                 {

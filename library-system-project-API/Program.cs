@@ -9,6 +9,7 @@ using DataAcessLayer.GenericRepo;
 using BusinessLayer.ManagersInterfaces;
 using BusinessLayer.Managers;
 using Microsoft.OpenApi.Models;
+using DataAcessLayer.Repositries;
 
 namespace library_system_project_API
 {
@@ -17,6 +18,18 @@ namespace library_system_project_API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["jwt:key"]));
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateIssuer = true,
+                ValidIssuer = builder.Configuration["jwt:issuer"],
+                ValidateAudience = true,
+                ValidAudience = builder.Configuration["jwt:audience"],
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = key
+            };
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -24,16 +37,7 @@ namespace library_system_project_API
             })
             .AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = builder.Configuration["jwt:issuer"],
-                    ValidateAudience = true,
-                    ValidAudience = builder.Configuration["jwt:audience"],
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["jwt:key"]))
-                };
+                options.TokenValidationParameters = tokenValidationParameters;
             });
             builder.Services.AddAuthorization();
             builder.Services.AddSwaggerGen(c =>
@@ -71,9 +75,13 @@ namespace library_system_project_API
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            //builder.Services.AddDbContext<Context>(options =>
+            //{
+            //    options.UseSqlServer(builder.Configuration.GetConnectionString("DEPI_Test"));
+            //});
             builder.Services.AddDbContext<Context>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DEPI_Test"));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("PostGress"));
             });
             builder.Services.AddIdentity<ApplicationUser,IdentityRole>(options => {
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.";
@@ -84,7 +92,9 @@ namespace library_system_project_API
             builder.Services.AddScoped<IAccountManager,AccountManager>();
             builder.Services.AddScoped<IBooksManager, BooksManager > ();
             builder.Services.AddScoped<ILoanManager, LoanManager>();
+            builder.Services.AddScoped<IRefreshTokenManager, RefreshTokenManager>();
             builder.Services.AddScoped(typeof(UserManager<>));
+            builder.Services.AddScoped<RefreshTokenRepositry>();
 
 
 
@@ -111,6 +121,7 @@ namespace library_system_project_API
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseStaticFiles();
 
 
             app.MapControllers();

@@ -16,6 +16,7 @@ namespace DataAcessLayer.Models
         }
         public virtual DbSet<Book> Books { get; set; }
         public DbSet<UserBook> UserBooks { get; set; }
+        public DbSet<RefreshTokens> RefreshTokens { get; set; } 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserBook>().HasKey(e => new { e.UserId, e.BookId });

@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.StaticFiles;
+using System.IO;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace library_system_project_API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles ="Admin")]
     public class BooksController : ControllerBase
     {
         private readonly IBooksManager _booksManager;
-        private readonly string _uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+        private readonly string _uploadsPath = Path.Combine(Directory.GetCurrentDirectory(),"wwwroot", "uploads");
+        private readonly string[] extenstions = { ".png", ".jpg" };
 
         public BooksController(IBooksManager booksManager)
         {
@@ -26,30 +29,9 @@ namespace library_system_project_API.Controllers
         [AllowAnonymous]
         public IActionResult GetAll() 
         {
-            var books = _booksManager.GetAll();
+            var path = $"{Request.Scheme}://{Request.Host}/uploads/";
+            var books = _booksManager.GetAll(path);
             return Ok(books);
-        }
-        [HttpGet("cover/{bookId}")]
-        [AllowAnonymous]
-        public IActionResult GetCover(int bookId)
-        {
-            var book = _booksManager.GetById(bookId);
-            if (book is null)
-                return BadRequest("image not found");
-            var filePath = Path.Combine(_uploadsPath, book.CoverUrl??"");
-
-            if (!System.IO.File.Exists(filePath))
-                return NotFound("File not found.");
-
-            // Detect the MIME type based on the file extension
-            var provider = new FileExtensionContentTypeProvider();
-            if (!provider.TryGetContentType(filePath, out string contentType))
-            {
-                contentType = "application/octet-stream"; // Fallback if unknown type
-            }
-
-            var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            return File(fileStream, contentType);
         }
         [HttpPost]
         public async Task<IActionResult> AddBook([FromForm]BookDto book)
@@ -57,13 +39,21 @@ namespace library_system_project_API.Controllers
             if (book.CoverUrl == null || book.CoverUrl.Length == 0)
                 return BadRequest("No file uploaded.");
 
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", book.CoverUrl.FileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            var filePath = _uploadsPath;
+            if (!Directory.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+            }
+            string imageExtension = Path.GetExtension(book.CoverUrl.FileName);
+            if (!extenstions.Contains(imageExtension))
+                return BadRequest("invalid extension type");
+            string imageName = Guid.NewGuid().ToString() + imageExtension;
+            string imagePath = Path.Combine(filePath, imageName);
+            using (var stream = new FileStream(imagePath, FileMode.Create))
             {
                 await book.CoverUrl.CopyToAsync(stream);
             }
-
+            book.CoverName = imageName;
             var check = _booksManager.AddBook(book);
             if (!check.IsValid) 
                     return BadRequest(check.ValidationMessage);

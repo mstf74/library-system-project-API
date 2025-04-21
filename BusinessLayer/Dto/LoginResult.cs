@@ -12,7 +12,6 @@ namespace BusinessLayer.Dto
         public bool Succeeded { get; set; }
         public string? ErrorMessage { get; set; }
         public string Id { get; set; }
-        public string user_name { get; set; }
         public string email { get; set; }
         public string role { get; set; }
     }

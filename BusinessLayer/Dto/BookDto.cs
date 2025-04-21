@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BusinessLayer.Dto
@@ -29,5 +30,6 @@ namespace BusinessLayer.Dto
         public int AvailableCopies { get; set; }
         [Required]
         public IFormFile  CoverUrl { get; set; }
+        public string CoverName {  get; set; }
     }
 }
