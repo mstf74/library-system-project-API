@@ -15,9 +15,11 @@ namespace DataAcessLayer.Models
         public int Id { get; set; }
         public string token { get; set; } = Guid.NewGuid().ToString();
         public string tokenId { get; set; }
-        [Column(TypeName = "timestamptz")]
+        //[Column(TypeName = "timestamptz")]
+        [Column(TypeName = "datetime2")]
         public DateTime? CreationDate { get; set; } = DateTime.UtcNow;
-        [Column(TypeName = "timestamptz")]
+        //[Column(TypeName = "timestamptz")]
+        [Column(TypeName = "datetime2")]
         public DateTime? expiryDate { get; set; }
         public bool used { get; set; } = false;
         public bool revoked { get; set; } = false;

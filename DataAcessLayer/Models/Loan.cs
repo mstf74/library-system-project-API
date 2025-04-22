@@ -13,13 +13,16 @@ namespace DataAcessLayer.Models
         [Key]
         public int Id { get; set; }
         [Required]
-        [Column(TypeName = "timestamp(6)")]
+        //[Column(TypeName = "timestamp(6)")]
+        [Column(TypeName = "datetime2")]
         public DateTime LoanDate { get; set; }
         [Required]
-        [Column(TypeName = "timestamp(6)")]
+        //[Column(TypeName = "timestamp(6)")]
+        [Column(TypeName = "datetime2")]
         public DateTime DueDate { get; set; }
         [Required]
-        [Column(TypeName = "timestamp(6)")]
+        //[Column(TypeName = "timestamp(6)")]
+        [Column(TypeName = "datetime2")]
         public DateTime ReturnDate { get; set; }
         [Required]
         public string Status { get; set; }
