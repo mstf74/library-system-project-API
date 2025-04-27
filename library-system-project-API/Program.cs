@@ -21,7 +21,7 @@ namespace library_system_project_API
             var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["jwt:key"]));
             var tokenValidationParameters = new TokenValidationParameters()
             {
-                ValidateIssuer = true,
+                ValidateIssuer = false,
                 ValidIssuer = builder.Configuration["jwt:issuer"],
                 ValidateAudience = true,
                 ValidAudience = builder.Configuration["jwt:audience"],
@@ -75,15 +75,15 @@ namespace library_system_project_API
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddDbContext<Context>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-            });
-
             //builder.Services.AddDbContext<Context>(options =>
             //{
-            //    options.UseNpgsql(builder.Configuration.GetConnectionString("PostGress"));
+            //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             //});
+
+            builder.Services.AddDbContext<Context>(options =>
+            {
+                options.UseNpgsql(builder.Configuration.GetConnectionString("PostGress"));
+            });
             builder.Services.AddIdentity<ApplicationUser,IdentityRole>(options => {
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.";
                 options.User.RequireUniqueEmail = true;

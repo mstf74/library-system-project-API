@@ -20,8 +20,8 @@ namespace DataAcessLayer.Models
         [MaxLength(50)]
         public string LastName { get; set; }
         [Required]
-        //[Column(TypeName = "timestamp(6)")]
-        [Column(TypeName = "datetime2")]
+        [Column(TypeName = "timestamp(6)")]
+        //[Column(TypeName = "datetime2")]
         public DateTime MemberShipDate { get; set; }
         [DefaultValue("user")]
         public String Role { get; set; } = "User";

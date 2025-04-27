@@ -98,7 +98,7 @@ namespace BusinessLayer.Managers
             oldBook.Category = book.Category;
             oldBook.NumberOfCopies = book.NumberOfCopies;
             oldBook.AvailableCopies = book.AvailableCopies;
-            oldBook.CoverUrl = book.CoverUrl.FileName;
+            oldBook.CoverUrl = book.CoverName;
             var result = validateException(_bookRepo.update,oldBook);
             return result;
         }

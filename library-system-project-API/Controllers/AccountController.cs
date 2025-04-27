@@ -1,4 +1,5 @@
-﻿using BusinessLayer.Dto;
+﻿#nullable disable
+using BusinessLayer.Dto;
 using BusinessLayer.ManagersInterfaces;
 using DataAcessLayer.Models;
 using Microsoft.AspNetCore.Http;
@@ -137,12 +138,20 @@ namespace library_system_project_API.Controllers
         }
         private async Task<TokenResultDto> GenerateToken(LoginResult user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configurationManager["jwt:key"]));
+            var JwtMinutes = _configurationManager["jwt:ExpiryDate"];
+            var secret = _configurationManager["jwt:key"];
+            int expiresAt;
+            if (!int.TryParse(JwtMinutes, out expiresAt))
+            {
+                expiresAt = 10;
+            }
+            // key 256 byte, algrothim-> cred , payload, expiration date , issure:publisher , audiene:users 
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub,user.Id),
-                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()), // a unique id for JWT Token
                 new Claim(JwtRegisteredClaimNames.Email, user.email),
                 new Claim(ClaimTypes.Role,user.role),
             };
@@ -150,7 +159,7 @@ namespace library_system_project_API.Controllers
                 issuer: _configurationManager["jwt:issuer"],
                 audience: _configurationManager["jwt:audience"],
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.UtcNow.AddMinutes(expiresAt),
                 signingCredentials: cred
             );
             var acesstoken = new JwtSecurityTokenHandler().WriteToken(token);
@@ -171,6 +180,7 @@ namespace library_system_project_API.Controllers
         }
         private async Task<TokenResultDto> ValidateAndRefreshToken(RequestTokenDto requestToken)
         {
+            // validating the Jwt Token 
             var key = Encoding.ASCII.GetBytes(_configurationManager["jwt:key"]);
             var jwtHandler = new JwtSecurityTokenHandler();
             var validationParameters = new TokenValidationParameters()
@@ -182,18 +192,23 @@ namespace library_system_project_API.Controllers
                 ValidIssuer = _configurationManager["jwt:issuer"],
                 ValidateIssuer = true,
                 ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
             };
             jwtHandler.ValidateToken(requestToken.jwtToken, validationParameters, out var validatedToken);
+
             if (validatedToken is not JwtSecurityToken jwtToken ||
                 !jwtToken.SignatureAlgorithm.Equals(SecurityAlgorithms.HmacSha256))
                 return null;
             var tokenJti = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti).Value;
+            // validating refreshToken
             var storedRefreshToken = await _refreshTokenManager.GetRefreshToken(requestToken.RefreshToken);
             if (storedRefreshToken is null || storedRefreshToken.expiryDate < DateTime.UtcNow ||
                 storedRefreshToken.used || storedRefreshToken.revoked)
                 return null;
+            // belong to each other
             if (storedRefreshToken.tokenId != tokenJti)
                 return null;
+            //Generate new tokens
             var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub).Value;
             var userEmail = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email).Value;
             var userRole = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role).Value;

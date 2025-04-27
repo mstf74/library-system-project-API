@@ -8,6 +8,7 @@ namespace BusinessLayer.Helper
     public static class EncryptionHelper
     {
         private static readonly string key = "12345678901234567890123456789012";
+        // randomness
         private static readonly string iv = "1234567890123456";
 
         public static string Encrypt(string plainText)
