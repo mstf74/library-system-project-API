@@ -77,8 +77,9 @@ namespace library_system_project_API
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<Context>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DEPI_Test"));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+
             //builder.Services.AddDbContext<Context>(options =>
             //{
             //    options.UseNpgsql(builder.Configuration.GetConnectionString("PostGress"));

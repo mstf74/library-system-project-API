@@ -9,17 +9,22 @@ using System.Threading.Tasks;
 
 namespace DataAcessLayer.Models
 {
-     public class Context: IdentityDbContext<ApplicationUser>
+    public class Context : IdentityDbContext<ApplicationUser>
     {
-        public Context(DbContextOptions<Context> options) :base(options) 
+        public Context(DbContextOptions<Context> options) : base(options)
         {
         }
+
         public virtual DbSet<Book> Books { get; set; }
         public DbSet<UserBook> UserBooks { get; set; }
-        public DbSet<RefreshTokens> RefreshTokens { get; set; } 
+        public DbSet<RefreshTokens> RefreshTokens { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<UserBook>().HasKey(e => new { e.UserId, e.BookId });
+
             modelBuilder.Entity<UserBook>()
                 .HasOne(e => e.User)
                 .WithMany(u => u.BorrowoedBooks)
@@ -27,15 +32,16 @@ namespace DataAcessLayer.Models
 
             modelBuilder.Entity<UserBook>()
                 .HasOne(e => e.Book)
-                .WithMany(b=>b.Users)
-                .HasForeignKey(e=>e.BookId);
-            base.OnModelCreating(modelBuilder);
+                .WithMany(b => b.Users)
+                .HasForeignKey(e => e.BookId);
+
             modelBuilder.Entity<Fine>()
                 .HasOne(f => f.Loan)
                 .WithOne(l => l.Fine)
-                .HasForeignKey<Fine>(f => f.LoanId);
-
+                .HasForeignKey<Fine>(f => f.LoanId)
+                .OnDelete(DeleteBehavior.Restrict); 
         }
+
         public override int SaveChanges()
         {
             var entities = ChangeTracker.Entries()
@@ -49,7 +55,7 @@ namespace DataAcessLayer.Models
                     ValidationContext validationContext = new ValidationContext(entity);
                     Validator.ValidateObject(entity, validationContext, validateAllProperties: true);
                 }
-                catch (Exception ex) 
+                catch (Exception ex)
                 {
                     throw new Exception(message: ex.Message);
                 }
@@ -57,13 +63,10 @@ namespace DataAcessLayer.Models
 
             return base.SaveChanges();
         }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-
             base.OnConfiguring(optionsBuilder);
         }
-
-        
     }
 }
-

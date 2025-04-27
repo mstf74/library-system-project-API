@@ -14,7 +14,7 @@ namespace BusinessLayer.Dto
         [Required]
         public string lastName { get; set; }
         [Required]
-        [EmailAddress]
+        [EmailAddress(ErrorMessage = "Invalid Email Format")]
         public string email { get; set; }
         [Required]
         public string user_name { get; set; }

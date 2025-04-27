@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DataAcessLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class @try : Migration
+    public partial class FixedCascadeIssue : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -284,7 +284,7 @@ namespace DataAcessLayer.Migrations
                         column: x => x.LoanId,
                         principalTable: "Loan",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

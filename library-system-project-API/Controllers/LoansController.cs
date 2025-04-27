@@ -2,12 +2,15 @@
 using Microsoft.AspNetCore.Mvc;
 using BusinessLayer.Dto;
 using BusinessLayer.ManagersInterfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 namespace library_system_project_API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class LoansController : ControllerBase
     {
         private readonly ILoanManager _loanManager;

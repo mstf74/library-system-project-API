@@ -10,6 +10,9 @@ using DataAcessLayer.GenericRepo;
 using DataAcessLayer.Models;
 
 using Microsoft.AspNetCore.Identity;
+using BusinessLayer.Helper;
+
+
 
 namespace BusinessLayer.Managers
 {
@@ -25,26 +28,32 @@ namespace BusinessLayer.Managers
         }
         public async Task<IdentityResult> Register(RegistrationDto user)
         {
-            var userName = await _UserManager.FindByNameAsync(user.user_name);
-            if (userName != null) 
+            var (isValid, errorMessage) = PasswordValidator.Validate(user.password);
+            if (!isValid)
             {
-                return IdentityResult.Failed(new IdentityError
-                {
-                    Description = "UserName is already registered."
-                });
+                return IdentityResult.Failed(new IdentityError { Description = errorMessage });
             }
-            ApplicationUser iduser = new ApplicationUser()
+
+            var existingUser = await _UserManager.FindByNameAsync(user.user_name);
+            if (existingUser != null)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "Username is already registered." });
+            }
+
+            var newUser = new ApplicationUser
             {
                 FirstName = user.firstName,
-                LastName = user.lastName,
+                LastName = EncryptionHelper.Encrypt(user.lastName),
                 UserName = user.user_name,
                 Email = user.email,
-                PhoneNumber = user.phoneNumber,
+                PhoneNumber = EncryptionHelper.Encrypt(user.phoneNumber),
                 MemberShipDate = DateTime.Now,
+                PasswordHash = CustomHasher.Hash(user.password) 
             };
-            var result = await _UserManager.CreateAsync(iduser, user.password);
-            return result;
+
+            return await _UserManager.CreateAsync(newUser); 
         }
+
         public async Task<IdentityResult> RegisterAdmin(RegistrationDto user)
         {
             var userName = await _UserManager.FindByNameAsync(user.user_name);
@@ -55,20 +64,21 @@ namespace BusinessLayer.Managers
                     Description = "UserName is already registered."
                 });
             }
-            ApplicationUser iduser = new ApplicationUser()
+            var adminUser = new ApplicationUser
             {
                 FirstName = user.firstName,
-                LastName = user.lastName,
+                LastName = EncryptionHelper.Encrypt(user.lastName),
                 UserName = user.user_name,
                 Email = user.email,
-                PhoneNumber = user.phoneNumber,
+                PhoneNumber = EncryptionHelper.Encrypt(user.phoneNumber),
                 MemberShipDate = DateTime.Now,
-                Role = "Admin"
+                Role = "Admin",
+                PasswordHash = CustomHasher.Hash(user.password) 
             };
-            var result = await _UserManager.CreateAsync(iduser, user.password);
-            return result;
+
+            return await _UserManager.CreateAsync(adminUser);
         }
-        public async Task<LoginResult> Login(LoginDto _user)
+            public async Task<LoginResult> Login(LoginDto _user)
         {
             var appuser = await _UserManager.FindByEmailAsync(_user.email);
             if (appuser == null)
@@ -79,14 +89,10 @@ namespace BusinessLayer.Managers
                     ErrorMessage = "Invalid Email"
                 };
             }
-            var check = await _UserManager.CheckPasswordAsync(appuser, _user.password);
-            if (!check)
+            var isPasswordValid = CustomHasher.Verify(_user.password, appuser.PasswordHash);
+            if (!isPasswordValid)
             {
-                return new LoginResult()
-                {
-                    Succeeded = false,
-                    ErrorMessage = "Invalid Password"
-                };
+                return new LoginResult { Succeeded = false, ErrorMessage = "Invalid Password" };
             }
             return new LoginResult() 
             {
@@ -99,18 +105,16 @@ namespace BusinessLayer.Managers
         public async Task<AccountDto> GetById(string id)
         {
             var user = await _UserManager.FindByIdAsync(id);
-            if (user == null)
-                return null;
-            
-            return new AccountDto()
+            if (user == null) return null;
+
+            return new AccountDto
             {
                 firstName = user.FirstName,
-                lastName = user.LastName,
+                lastName = EncryptionHelper.Decrypt(user.LastName),
                 user_name = user.UserName,
                 email = user.Email,
-                phoneNumber = user.PhoneNumber
+                phoneNumber = EncryptionHelper.Decrypt(user.PhoneNumber)
             };
-
         }
         public async Task<LoginResult> UpdateUser(string id , AccountDto account)
         {
@@ -133,9 +137,9 @@ namespace BusinessLayer.Managers
                 };
             }
             olduser.FirstName = account.firstName;
-            olduser.LastName = account.lastName;
+            olduser.LastName = EncryptionHelper.Encrypt(account.lastName); 
             olduser.UserName = account.user_name;
-            olduser.PhoneNumber = account.phoneNumber;
+            olduser.PhoneNumber = EncryptionHelper.Encrypt(account.phoneNumber);
             var result = await _UserManager.UpdateAsync(olduser);
             if (!result.Succeeded)
             {

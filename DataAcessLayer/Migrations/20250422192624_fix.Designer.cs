@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAcessLayer.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20250422162728_try")]
-    partial class @try
+    [Migration("20250422192624_fix")]
+    partial class fix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -413,7 +413,7 @@ namespace DataAcessLayer.Migrations
                     b.HasOne("DataAcessLayer.Models.Loan", "Loan")
                         .WithOne("Fine")
                         .HasForeignKey("DataAcessLayer.Models.Fine", "LoanId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataAcessLayer.Models.ApplicationUser", "User")
